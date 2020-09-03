@@ -537,7 +537,7 @@ int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
     end = strstr(start, "\r\n");
     strncpy(headers->origin, start, end-start);
     headers->origin[end-start] = '\0';
-   
+
     start = strstr(handshake, "\r\nSec-WebSocket-Version: ");
     if (start) {
         // HyBi/RFC 6455
@@ -561,13 +561,15 @@ int parse_handshake(ws_ctx_t *ws_ctx, char *handshake) {
         end = strstr(start, "\r\n");
         strncpy(headers->connection, start, end-start);
         headers->connection[end-start] = '\0';
-   
+
         start = strstr(handshake, "\r\nSec-WebSocket-Protocol: ");
-        if (!start) { return 0; }
-        start += 26;
-        end = strstr(start, "\r\n");
-        strncpy(headers->protocols, start, end-start);
-        headers->protocols[end-start] = '\0';
+        if (start) { 
+			start += 26;
+			end = strstr(start, "\r\n");
+			strncpy(headers->protocols, start, end-start);
+			headers->protocols[end-start] = '\0';
+		}
+		
     } else {
         // Hixie 75 or 76
         ws_ctx->hybi = 0;
@@ -720,7 +722,7 @@ ws_ctx_t *do_handshake(int sock) {
         usleep(10);
     }
 
-    //handler_msg("handshake: %s\n", handshake);
+    // handler_msg("handshake: %s\n", handshake);
     if (!parse_handshake(ws_ctx, handshake)) {
         handler_emsg("Invalid WS request\n");
         free_ws_ctx(ws_ctx);
